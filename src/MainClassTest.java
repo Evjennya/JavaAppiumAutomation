@@ -3,10 +3,10 @@ import org.junit.Test;
 
 public class MainClassTest {
     @Test
-    public void testGetLocalNumber(){
-        int expected = 14;
-        MainClass number = new MainClass();
-        Assert.assertTrue("LocalNumber != 14", expected == number.getLocalNumber());
+    public void testGetClassNumber(){
+        MainClass classNumber = new MainClass();
+        int minExpected = 45;
+        Assert.assertTrue("Class_number <= " + minExpected, classNumber.getClassNumber() > minExpected);
     }
 
 }
