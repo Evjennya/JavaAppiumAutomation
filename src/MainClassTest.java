@@ -3,10 +3,9 @@ import org.junit.Test;
 
 public class MainClassTest {
     @Test
-    public void testGetClassNumber(){
-        MainClass classNumber = new MainClass();
-        int minExpected = 45;
-        Assert.assertTrue("Class_number <= " + minExpected, classNumber.getClassNumber() > minExpected);
+    public void testGetClassString(){
+        MainClass classString = new MainClass();
+        Assert.assertTrue("Class_string doesn't contain substrings hello or Hello", classString.getClassString().contains("Hello") | classString.getClassString().contains("hello") );
     }
 
 }
