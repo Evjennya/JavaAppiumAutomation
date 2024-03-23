@@ -1,6 +1,7 @@
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -35,7 +36,7 @@ public class FirstTest {
     }
 
     @Test
-    public void testCancelSearch() {
+    public void testCheckWordInSearchResults() {
         waitForElementAndClick(
                 By.xpath("//*[contains(@text, 'Skip')]"),
                 "Cannot find Skip button",
@@ -54,31 +55,25 @@ public class FirstTest {
                 "Cannot find search input",
                 5
         );
-        listOfArticlesIsPresent(
-                By.id("org.wikipedia:id/page_list_item_title"),
-                "Not enough articles",
+        List<WebElement> articles_titles =  waitForElementsAndGetArticlesNames(
+                By.id("org.wikipedia:id/page_list_item_title") ,
+                "Articles are not present",
                 5
         );
 
-        waitForElementAndClick(
-                By.id("org.wikipedia:id/search_close_btn"),
-                "Cannot find X to cancel search",
-                5
-        );
-
-        waitforElementNotPresent(
-                By.id("search_results_list"),
-                "Search results are still present",
-                5
-        );
+        for (WebElement article : articles_titles) {
+           Assert.assertTrue("There is no search word in title " + article.getAttribute("name"), article.getAttribute("name").contains("Java"));
+        }
 
     }
 
-    private List<WebElement> listOfArticlesIsPresent(By by, String error_message, long timeoutInSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
-        wait.withMessage(error_message + "\n");
-        return wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(by, 1));
+
+    private List<WebElement> waitForElementsAndGetArticlesNames(By by, String error_message, long timeoutInSeconds) {
+        WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
+        List<WebElement> articlesTitles = driver.findElements(by);
+        return articlesTitles;
     }
+
 
     private WebElement waitForElementAndSendKeys(By by, String value, String error_message, long timeoutInSeconds) {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
@@ -86,11 +81,6 @@ public class FirstTest {
         return element;
     }
 
-    private boolean waitforElementNotPresent(By by, String error_message, long timeoutInSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
-        wait.withMessage(error_message + "\n");
-        return wait.until(ExpectedConditions.invisibilityOfElementLocated(by));
-    }
 
     private WebElement waitForElementPresent(By by, String error_message, long timeoutInSeconds) {
         WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
@@ -104,17 +94,6 @@ public class FirstTest {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
         element.click();
         return element;
-    }
-
-    private boolean assertElementHasText(By by, String expected_text, String error_message, long timeoutInSeconds) {
-        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
-        wait.withMessage(error_message + "\n");
-        WebElement element_with_text = driver.findElement(by);
-        return wait.until(ExpectedConditions.textToBePresentInElement(element_with_text, expected_text));
-    }
-
-    private boolean assertElementHasText(By by, String expected_text, String error_message) {
-        return assertElementHasText(by, expected_text, error_message, 5);
     }
 
 }
