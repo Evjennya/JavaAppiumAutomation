@@ -1,10 +1,11 @@
 import io.appium.java_client.AppiumDriver;
+import io.appium.java_client.TouchAction;
 import io.appium.java_client.android.AndroidDriver;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -35,14 +36,14 @@ public class FirstTest {
         driver.quit();
     }
 
+
     @Test
-    public void testCheckWordInSearchResults() {
+    public void testSwipeArticle() {
         waitForElementAndClick(
                 By.xpath("//*[contains(@text, 'Skip')]"),
                 "Cannot find Skip button",
                 5
         );
-
         waitForElementAndClick(
                 By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
                 "Cannot find 'Search Wikipedia' input",
@@ -51,19 +52,27 @@ public class FirstTest {
 
         waitForElementAndSendKeys(
                 By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
-                "Java",
+                "Appium",
                 "Cannot find search input",
                 5
         );
-        List<WebElement> articles_titles =  waitForElementsAndGetArticlesNames(
-                By.id("org.wikipedia:id/page_list_item_title") ,
-                "Articles are not present",
+
+        waitForElementAndClick(
+                By.xpath("//*[@resource-id='org.wikipedia:id/page_list_item_title'][@text='Appium']"),
+                "Cannot find Appium in search",
                 5
         );
 
-        for (WebElement article : articles_titles) {
-           Assert.assertTrue("There is no search word in title " + article.getAttribute("name"), article.getAttribute("name").contains("Java"));
-        }
+        waitForElementPresent(
+                By.xpath("//*[@content-desc='Appium']"),
+                "Cannot find 'Appium' header",
+                15
+        );
+        swipeUpToFindElement(
+                By.xpath("//*[@content-desc='View article in browser']"),
+                "Cannot find the end of the article",
+                10
+        );
 
     }
 
@@ -96,4 +105,29 @@ public class FirstTest {
         return element;
     }
 
+    protected void swipeUp(int timeOfSwipe) {
+        TouchAction action = new TouchAction(driver);
+        Dimension size = driver.manage().window().getSize();
+        int x = size.width / 2;
+        int start_y = (int) (size.height * 0.8);
+        int end_y = (int) (size.height * 0.2);
+
+        action.press(x, start_y).waitAction(timeOfSwipe).moveTo(x, end_y).release().perform();
+    }
+
+    protected void swipeUpQuick() {
+        swipeUp(200);
+    }
+
+    protected void swipeUpToFindElement(By by, String error_message, int max_swipes) {
+        int already_swiped = 0;
+        while (driver.findElements(by).size() == 0) {
+            if (already_swiped > max_swipes) {
+                waitForElementPresent(by, "Cannot find element by swiping up. \n" + error_message, 0);
+                return;
+            }
+            swipeUpQuick();
+            ++already_swiped;
+        }
+    }
 }
