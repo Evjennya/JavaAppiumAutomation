@@ -76,6 +76,82 @@ public class FirstTest {
 
     }
 
+    @Test
+    public void saveFirstArticleToMyList(){
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text, 'Skip')]"),
+                "Cannot find Skip button",
+                5
+        );
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
+                "Cannot find 'Search Wikipedia' input",
+                5
+        );
+
+        waitForElementAndSendKeys(
+                By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
+                "Java",
+                "Cannot find search input",
+                5
+        );
+
+        waitForElementAndClick(
+                By.xpath("//*[@resource-id='org.wikipedia:id/search_results_list']//*[@text='Object-oriented programming language']"),
+                "Cannot find article title",
+                5
+        );
+
+
+        WebElement title_element = waitForElementPresent(
+                By.xpath("//*[@content-desc='Java (programming language)']"),
+                "Cannot find 'Java (programming language)' header",
+                15
+        );
+
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/page_save"),
+                "Cannot find save button",
+                5
+        );
+
+        waitForElementAndClick(
+                By.id("org.wikipedia:id/snackbar_action"),
+                "Cannot find 'Add to list' button",
+                5
+        );
+
+        waitForElementAndSendKeys(
+                By.id("org.wikipedia:id/text_input"),
+                "Learning programming",
+                "Cannot put text into articles folder input",
+                5
+        );
+
+        waitForElementAndClick(
+                By.xpath("//*[@text='OK']"),
+                "Cannot press OK button",
+                5
+        );
+
+        waitForElementAndClick(
+                By.xpath("//*[@text='View list']"),
+                "Cannot press 'View list' button",
+                5
+        );
+
+        swipeElementToLeft(
+                By.id("org.wikipedia:id/page_list_item_container"),
+                "Cannot find saved article"
+                );
+
+        waitforElementNotPresent(
+                By.xpath("//*[@content-desc='Java (programming language)']"),
+                "Cannot delete saved article",
+                5
+        );
+
+    }
 
     private List<WebElement> waitForElementsAndGetArticlesNames(By by, String error_message, long timeoutInSeconds) {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
@@ -105,6 +181,12 @@ public class FirstTest {
         return element;
     }
 
+    private boolean waitforElementNotPresent(By by, String error_message, long timeoutInSeconds) {
+        WebDriverWait wait = new WebDriverWait(driver, timeoutInSeconds);
+        wait.withMessage(error_message + "\n");
+        return wait.until(ExpectedConditions.invisibilityOfElementLocated(by));
+    }
+
     protected void swipeUp(int timeOfSwipe) {
         TouchAction action = new TouchAction(driver);
         Dimension size = driver.manage().window().getSize();
@@ -129,5 +211,24 @@ public class FirstTest {
             swipeUpQuick();
             ++already_swiped;
         }
+    }
+
+    protected void swipeElementToLeft(By by, String error_message){
+        WebElement element =  waitForElementPresent(by, error_message, 10);
+
+        int left_x = element.getLocation().getX();
+        int right_x = left_x + (int) (element.getSize().getWidth() * 0.8);
+        int upper_y = element.getLocation().getY();
+        int lower_y = upper_y + element.getSize().getHeight();
+        int middle_y = (upper_y + lower_y) / 2;
+
+        TouchAction action = new TouchAction(driver);
+        action
+                .press(right_x, middle_y)
+                .waitAction(300)
+                .moveTo(left_x, middle_y)
+                .release()
+                .perform();
+
     }
 }
