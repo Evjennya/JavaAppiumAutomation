@@ -30,7 +30,10 @@ public class FirstTest {
         capabilities.setCapability("appActivity", ".main.MainActivity");
         capabilities.setCapability("app", "C:\\Users\\777\\Devel\\JavaAppiumAutomation\\apks\\Wikipedia2024.apk");
 
+
         driver = new AndroidDriver(new URL("http://127.0.0.1:4723/wd/hub"), capabilities);
+
+        driver.rotate(ScreenOrientation.PORTRAIT);
     }
 
     @After
@@ -185,6 +188,50 @@ public class FirstTest {
     }
 
     @Test
+    public void testCompareArticleTitle() {
+
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text, 'Skip')]"),
+                "Cannot find Skip button",
+                5
+        );
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
+                "Cannot find 'Search Wikipedia' input",
+                5
+        );
+
+        waitForElementAndSendKeys(
+                By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
+                "Java",
+                "Cannot find search input",
+                5
+        );
+
+        waitForElementAndClick(
+                By.xpath("//*[@resource-id='org.wikipedia:id/search_results_list']//*[@text='Object-oriented programming language']"),
+                "Cannot find article title",
+                5
+        );
+
+
+        WebElement title_element = waitForElementPresent(
+                By.xpath("//*[@content-desc='Java (programming language)']"),
+                "Cannot find 'Java (programming language)' header",
+                15
+        );
+
+        String article_title = title_element.getAttribute("name");
+
+        Assert.assertEquals(
+                "We see unexpected title",
+                "Java (programming language)",
+                article_title
+        );
+    }
+
+
+    @Test
     public void TestAmountOfNotEmptySearch() {
         waitForElementAndClick(
                 By.xpath("//*[contains(@text, 'Skip')]"),
@@ -224,7 +271,6 @@ public class FirstTest {
     }
 
     @Test
-
     public void TestAmountOfEmptySearch() {
         waitForElementAndClick(
                 By.xpath("//*[contains(@text, 'Skip')]"),
@@ -239,6 +285,7 @@ public class FirstTest {
         );
 
         String search_line = "zxcvasdfqwer";
+
         waitForElementAndSendKeys(
                 By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
                 search_line,
@@ -327,7 +374,7 @@ public class FirstTest {
     }
 
     @Test
-    public void testCheckSearchArticleInBackground(){
+    public void testCheckSearchArticleInBackground() {
 
         waitForElementAndClick(
                 By.xpath("//*[contains(@text, 'Skip')]"),
@@ -351,7 +398,7 @@ public class FirstTest {
         waitForElementPresent(
                 By.xpath("//*[@resource-id='org.wikipedia:id/search_results_list']//*[@text='Object-oriented programming language']"),
                 "Cannot find article title",
-                5
+                10
         );
 
         driver.runAppInBackground(5);
@@ -361,6 +408,43 @@ public class FirstTest {
                 "Cannot find article after returning from background",
                 5
         );
+    }
+
+    //Ex6 Тест assert title
+    @Test
+    public void testAssertElementPresent() {
+
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text, 'Skip')]"),
+                "Cannot find Skip button",
+                5
+        );
+        waitForElementAndClick(
+                By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
+                "Cannot find 'Search Wikipedia' input",
+                5
+        );
+
+        waitForElementAndSendKeys(
+                By.xpath("//*[contains(@text, 'Search Wikipedia')]"),
+                "Java",
+                "Cannot find search input",
+                5
+        );
+
+        waitForElementAndClick(
+                By.xpath("//*[@resource-id='org.wikipedia:id/search_results_list']//*[@text='Object-oriented programming language']"),
+                "Cannot find article title",
+                5
+        );
+
+
+
+        assertElementPresent(
+                By.xpath("//*[@content-desc='Java (programming language)']"),
+                "Cannot find title element"
+        );
+
     }
 
 
@@ -460,6 +544,13 @@ public class FirstTest {
             throw new AssertionError(default_message + " " + error_message);
         }
     }
+
+
+    private void assertElementPresent(By by, String error_message) {
+        WebElement article_title =  driver.findElement(by);
+        Assert.assertNotNull(error_message, article_title);
+    }
+
 
     private String waitForElementAndGetAttribute(By by, String attribute, String error_message, long timeoutInSeconds) {
         WebElement element = waitForElementPresent(by, error_message, timeoutInSeconds);
